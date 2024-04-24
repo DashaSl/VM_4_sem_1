@@ -4,6 +4,7 @@
 #include <cmath>
 #include <array>
 #include <fstream>
+#include <cstdlib>
 #define A 1
 #define C 1
 #define B 3
@@ -16,10 +17,16 @@ double GLOBAL_x0;
 double derivative_x(double x, double y, double z);
 double derivative_y(double x, double y, double z);
 double derivative_z(double x, double y, double z);
+double GLOBAL_CURR_SPIKE;
+
+
 double Butcher_DP5[6][6] = {{0.2}, {0.075, 0.225}, {0.9777777777777777, -3.7333333333333333, 3.555555555555555}, 
 {2.9525986892242035, -11.595793324188385, 9.822892851699436, -0.2908093278463649 }, 
 {2.8462752525252526, -10.757575757575758, 8.906422717743473, 0.2784090909090909, -0.2735313036020583},
 {0.09114583333333333, 0, 0.44923629829290207, 0.6510416666666666, -0.322376179245283, 0.13095238095238096}};
+
+double LOC[3] = {0, 0, 0};
+
 double K_X[6] = {};
 double K_Y[6] = {};
 double K_Z[6] = {};

@@ -50,31 +50,172 @@ void RK(double h){
 
 void merrygoround(double h, int num_of_iter, std::string filename){
     std::ofstream fout;
+    int k = num_of_iter/10; 
     fout.open(filename);
     fout << 0 << " " << GLOBAL_point[0] << " " << GLOBAL_point[1] << " " << GLOBAL_point[2] << "\n";
     double time = 0;
     for(int i = 0; i < num_of_iter; i++){
+        if(!(i % k)){
+            printf("%0d out of 10\n", i/k);
+        }
         RK(h);
         time+= h;
         fout << time << " " << GLOBAL_point[0] << " " << GLOBAL_point[1] << " " << GLOBAL_point[2] << "\n";
     }
     fout.close();
+    printf("\n");
 }
+
+void merry_for_ISI(double h, int num_of_iter, double start_I, double delta_I, int num_of_iterations, double** mass){
+    GLOBAL_I_ext = start_I;
+    int k = num_of_iter/10;
+    for(int i = 0; i < num_of_iterations; i++){
+        GLOBAL_point[0] = 0.1;
+        GLOBAL_point[1] = 1;
+        GLOBAL_point[2] = 0.2;
+        std::cout << "Calculating for I = " << GLOBAL_I_ext << std::endl;
+        int ind_of_spike = 0; // 
+        double time = 0;
+        for(int j = 0; j < 3; j++){
+            RK(h);
+            time+=h;
+            LOC[j] = GLOBAL_point[0];
+        }
+        //заполняем первые три значения
+        for(int j = 3; j < num_of_iter; j++){
+            RK(h);
+            time += h;
+            LOC[0] = LOC[1];
+            LOC[1] = LOC[2];
+            LOC[2] = GLOBAL_point[0];
+
+            if(LOC[1] > LOC[0] && LOC[1] > LOC[2]){
+
+                mass[i][ind_of_spike] = time - GLOBAL_CURR_SPIKE;
+                //заносим промежуток
+                //новое время последнего спайка 
+                //но надо будет нафиг выбросить первый интервал, т.к. он некорректен
+                GLOBAL_CURR_SPIKE = time;
+                ind_of_spike+=1;
+            }
+
+            if(ind_of_spike >= 100){
+                break;
+                //чёт много спайков нашли, тормозим коней
+            }
+            
+        }
+
+
+        GLOBAL_I_ext += delta_I;
+    }
+}
+
+
+
+void merry_for_ISI_r(double h, int num_of_iter, double start_r, double delta_r, int num_of_iterations, double** mass){
+    GLOBAL_I_ext = 3;
+    GLOBAL_r = start_r;
+    int k = num_of_iter/10;
+    for(int i = 0; i < num_of_iterations; i++){
+        GLOBAL_point[0] = 0.1;
+        GLOBAL_point[1] = 1;
+        GLOBAL_point[2] = 0.2;
+        std::cout << "Calculating for r = " << GLOBAL_r << std::endl;
+        int ind_of_spike = 0; // 
+        double time = 0;
+        for(int j = 0; j < 3; j++){
+            RK(h);
+            time+=h;
+            LOC[j] = GLOBAL_point[0];
+        }
+        //заполняем первые три значения
+        for(int j = 3; j < num_of_iter; j++){
+            RK(h);
+            time += h;
+            LOC[0] = LOC[1];
+            LOC[1] = LOC[2];
+            LOC[2] = GLOBAL_point[0];
+
+            if(LOC[1] > LOC[0] && LOC[1] > LOC[2] && time > 300){
+
+                mass[i][ind_of_spike] = time - GLOBAL_CURR_SPIKE;
+                //заносим промежуток
+                //новое время последнего спайка 
+                //но надо будет нафиг выбросить первый интервал, т.к. он некорректен
+                GLOBAL_CURR_SPIKE = time;
+                ind_of_spike+=1;
+            }
+
+            if(ind_of_spike >= 100){
+                break;
+                //чёт много спайков нашли, тормозим коней
+            }
+            
+        }
+
+
+        GLOBAL_r += delta_r;
+    }
+}
+
+
+
 int main(){
     std::cout << "Enter current which enters neuron: ";
     std::cin >> GLOBAL_I_ext;
-    //std::cout << "Enter parametr r , s and x0 : "; 
-   // std::cin >> GLOBAL_r >> GLOBAL_s >> GLOBAL_x0;
-   GLOBAL_point[0] = 0.1;
-   GLOBAL_point[1] = 1;
-   GLOBAL_point[2] = 0.2;
-   GLOBAL_r = 0.005;
-   GLOBAL_s = 4;
-   GLOBAL_x0 = -1.6;
-    //std::cout << "Enter starting point (x, y, z): "; 
-    //std::cin >> GLOBAL_point[0] >> GLOBAL_point[1] >> GLOBAL_point[2];
-    merrygoround(0.001, 5000000, "Test");
-    printf("Result with initial parametrs I_ext = %f, r = %f\n", GLOBAL_I_ext, GLOBAL_r);
-    printf("Starting point: (%f, %f, %f)\n", GLOBAL_point[0], GLOBAL_point[1], GLOBAL_point[2]);
+
+    GLOBAL_point[0] = 0.1;
+    GLOBAL_point[1] = 1;
+    GLOBAL_point[2] = 0.2;
+    GLOBAL_r = 0.005;
+    GLOBAL_s = 4;
+    GLOBAL_x0 = -1.6;
+   
+    int delta_I = 0;
+    int start_I = 0;
+    int num_of_iterations = 30;
+
+
+
+
+    double** ISI_INT = (double**) malloc(sizeof(double*)*num_of_iterations);
+    for(int i = 0; i < num_of_iterations; i++){
+        ISI_INT[i] = (double*) calloc(100, sizeof(double));
+    }
+    //100 - максимальное количество, которое хочется учитывать. Т.е. находим первые 100 или менее интервалов
+    GLOBAL_CURR_SPIKE = 0;
+
+    merry_for_ISI_r(0.0005, 2000000, 0.0035, 0.0001, num_of_iterations, ISI_INT);
+
+
+
+    /*
+    merry_for_ISI(0.0005, 2000000, 1.0, 0.1, num_of_iterations, ISI_INT);
+    */
+    GLOBAL_r = 0.0035;
+    std::cout << "{";
+    for(int i = 0; i < num_of_iterations; i++){
+        std::cout << GLOBAL_r << " : [";
+        for(int j = 1; j < 100; j++){
+            if(abs(ISI_INT[i][j]) < 0.0001){
+                printf("\b\b");
+                break;
+            }
+            printf("%.4f, ", ISI_INT[i][j]);
+
+    
+        }
+        printf("],\n");
+        GLOBAL_r += 0.0001;
+    }
+    printf("\b\b}");
+
+
+    for(int i = 0; i < num_of_iterations; i++){
+        free(ISI_INT[i]);
+    }
+    free(ISI_INT);
+    //merrygoround(0.0005, 2000000, "Test");
     return 0;
 }
