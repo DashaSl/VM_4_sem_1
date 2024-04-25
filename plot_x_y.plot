@@ -1,5 +1,5 @@
 set term png
-set term png size 640, 480
+set term png size 1920, 1080
 set output "plot_y_x.png"
 
 set title "Voltage,current"

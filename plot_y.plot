@@ -1,4 +1,5 @@
 set term png
+set term png size 3840, 1080
 set output "plot_y_t.png"
 
 set title "Voltage"
