@@ -86,14 +86,14 @@ void merry_for_ISI(double h, int num_of_iter, double start_I, double delta_I, in
                 mass[i][ind_of_spike] = time - GLOBAL_CURR_SPIKE;
                 //заносим промежуток
                 //новое время последнего спайка 
-                //но надо будет нафиг выбросить первый интервал, т.к. он некорректен
+                //но надо будет выбросить первый интервал (первые 300 итераций по времени), т.к. т.к. система ещё не "устаканилась"
                 GLOBAL_CURR_SPIKE = time;
                 ind_of_spike+=1;
             }
 
             if(ind_of_spike >= 100){
                 break;
-                //чёт много спайков нашли, тормозим коней
+                //достаточно найти 100 спайков, далее вычисления излишни
             }
             
         }
@@ -133,13 +133,13 @@ void merry_for_ISI_r(double h, int num_of_iter, double start_r, double delta_r, 
                 mass[i][ind_of_spike] = time - GLOBAL_CURR_SPIKE;
                 //заносим промежуток
                 //новое время последнего спайка 
-                //но надо будет нафиг выбросить первый интервал, т.к. он некорректен
+                //но надо будет выбросить первый интервал (первые 300 итераций по времени), т.к. т.к. система ещё не "устаканилась"
                 GLOBAL_CURR_SPIKE = time;
                 ind_of_spike+=1;
             }
             if(ind_of_spike >= 100){
                 break;
-                //чёт много спайков нашли, тормозим коней
+                //достаточно найти 100 спайков, далее вычисления излишни
             }  
         }
         GLOBAL_r += delta_r;
@@ -151,9 +151,9 @@ void merry_for_ISI_r(double h, int num_of_iter, double start_r, double delta_r, 
 int main(){
 
     GLOBAL_I_ext = 3;
-    GLOBAL_point[0] = 0.1;
-    GLOBAL_point[1] = 1;
-    GLOBAL_point[2] = 0.2;
+    GLOBAL_point[0] = 0;
+    GLOBAL_point[1] = 0;
+    GLOBAL_point[2] = 0;
     GLOBAL_r = 0.005;
     GLOBAL_s = 4;
     GLOBAL_x0 = -1.6;
@@ -198,14 +198,14 @@ int main(){
 
 
 
-    GLOBAL_I_ext = 3;
-    GLOBAL_point[0] = 0.1;
-    GLOBAL_point[1] = 1;
-    GLOBAL_point[2] = 0.2;
+    GLOBAL_I_ext = 0;
+    GLOBAL_point[0] = 0;
+    GLOBAL_point[1] = 0;
+    GLOBAL_point[2] = 0;
     GLOBAL_r = 0.005;
     GLOBAL_s = 4;
     GLOBAL_x0 = -1.6;
-    num_of_iterations = 40;
+    num_of_iterations = 200;
 
 
     GLOBAL_CURR_SPIKE = 0;
@@ -216,7 +216,7 @@ int main(){
     }
 
 
-    merry_for_ISI(0.0005, 2000000, 1.0, 0.1, num_of_iterations, ISI_INT);
+    merry_for_ISI(0.0005, 2000000, 0, 0.0375, num_of_iterations, ISI_INT);
 
 
     fout.open("I_bifurcation");
@@ -239,15 +239,15 @@ int main(){
 
 
     GLOBAL_I_ext = 3;
-    GLOBAL_point[0] = 0.1;
-    GLOBAL_point[1] = 1;
-    GLOBAL_point[2] = 0.2;
+    GLOBAL_point[0] = 0;
+    GLOBAL_point[1] = 0;
+    GLOBAL_point[2] = 0;
     GLOBAL_r = 0.005;
     GLOBAL_s = 4;
     GLOBAL_x0 = -1.6;
 
 
-    merrygoround(0.0005, 2000000, "Test");
+    merrygoround(0.05, 20000, "Test");
 
     return 0;
 }
